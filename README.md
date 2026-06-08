@@ -154,9 +154,10 @@ docker run -it --rm \
   -e CHROMA_HOST=chromadb \
   -e CHROMA_PORT=8000 \
   -e NEO4J_URI=bolt://neo4j:7687 \
+  --entrypoint /app/.venv/bin/python \
   -v $(pwd)/data:/app/data \
   kg-rag-rag:latest \
-  /app/.venv/bin/python -m kg_rag.rag.ingest --target both
+  -m kg_rag.rag.ingest --target both
 ```
 
 You will see:
@@ -184,9 +185,10 @@ docker run -it --rm \
   --env-file .env \
   -e CHROMA_HOST=chromadb \
   -e CHROMA_PORT=8000 \
+  --entrypoint /app/.venv/bin/python \
   -v $(pwd)/data:/app/data \
   kg-rag-rag:latest \
-  /app/.venv/bin/python -m kg_rag.rag.ingest --target chroma
+  -m kg_rag.rag.ingest --target chroma
 ```
 
 ### Ingest Neo4j only
@@ -196,9 +198,10 @@ docker run -it --rm \
   --network kg-rag_default \
   --env-file .env \
   -e NEO4J_URI=bolt://neo4j:7687 \
+  --entrypoint /app/.venv/bin/python \
   -v $(pwd)/data:/app/data \
   kg-rag-rag:latest \
-  /app/.venv/bin/python -m kg_rag.rag.ingest --target neo4j
+  -m kg_rag.rag.ingest --target neo4j
 ```
 
 ### Rebuild BM25 index only (no re-embedding)
@@ -207,9 +210,10 @@ docker run -it --rm \
 docker run -it --rm \
   --network kg-rag_default \
   --env-file .env \
+  --entrypoint /app/.venv/bin/python \
   -v $(pwd)/data:/app/data \
   kg-rag-rag:latest \
-  /app/.venv/bin/python -m kg_rag.rag.ingest --bm25-only
+  -m kg_rag.rag.ingest --bm25-only
 ```
 
 > ℹ️ Ingestion is idempotent — running it again won't create duplicates. ChromaDB uses upsert and Neo4j uses MERGE.
