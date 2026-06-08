@@ -13,7 +13,7 @@ wheels/
 
 # data — exclude everything except support_tickets.json
 data/raw/*
-!data/raw/support_tickets.json
+!data/raw/support_tickets_sample.json
 data/cached/
 data/modified/
 data/sampled/
