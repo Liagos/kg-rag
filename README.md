@@ -139,6 +139,18 @@ docker-compose ps
 
 You should see `healthy` for both `neo4j` and `chromadb`.
 
+### 4 — Build the RAG container
+
+```bash
+docker-compose build rag
+```
+
+This builds the image without starting it or running ingestion. Run this once after cloning or whenever you update the code.
+
+To rebuild from scratch (no cache):
+```bash
+docker-compose build --no-cache rag
+```
 ---
 
 ## Ingestion
