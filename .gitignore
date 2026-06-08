@@ -40,4 +40,4 @@ neo4j_data/
 
 # logs
 *.log
-EOF
+EOF.DS_Store
