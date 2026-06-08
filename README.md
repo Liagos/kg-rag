@@ -17,11 +17,11 @@ A RAG (Retrieval-Augmented Generation) system for querying Jira support tickets 
               │   (qa.py)        │
               └──┬─────────────┬─┘
                  │             │
-    ┌────────────▼───┐    ┌─────▼──────────┐
-    │   ChromaDB     │    │     Neo4j      │
-    │ Semantic + BM25│    │  Graph filters │
-    │ port 8000      │    │  port 7687     │
-    └────────────────┘    └────────────────┘
+    ┌────────────▼────┐    ┌─────▼───────────┐
+    │   ChromaDB      │    │     Neo4j       │
+    │ Semantic + BM25 │    │  Graph filters  │
+    │ port 8000       │    │  port 7687      │
+    └─────────────────┘    └─────────────────┘
 ```
 
 ### Retrieval Modes
@@ -33,11 +33,52 @@ A RAG (Retrieval-Augmented Generation) system for querying Jira support tickets 
 
 ---
 
+## Dataset
+
+This repository includes a **9k sample** of the full dataset for demonstration purposes.
+
+The full dataset contains **100k+ Jira support tickets** across multiple products, regions and categories.
+
+To request the full dataset contact:
+
+**Odysseas Liagouris**
+📧 [odyliagouris@gmail.com](mailto:odyliagouris@gmail.com)
+🐙 [github.com/Liagos](https://github.com/Liagos)
+
+---
+
+## ⏱️ Performance Notes
+
+### First run — ingestion
+
+Ingestion runs once on first startup. Expected times for the **9k sample**:
+
+| Step | Time |
+|---|---|
+| Building document corpus | ~30 sec |
+| OpenAI embeddings | ~3-5 min |
+| ChromaDB upload | ~1 min |
+| Neo4j ingestion | ~2-3 min |
+| BM25 index build | ~30 sec |
+| **Total** | **~7-10 min** |
+
+For the full **100k dataset** expect **~45-60 min** total.
+
+> ℹ️ Ingestion only runs once — data persists in Docker volumes across restarts.
+
+### First query — model initialization
+
+The first time you send a question in Streamlit, expect a **30-60 second delay** while the reranker model (`BAAI/bge-reranker-base`) loads into memory. Subsequent queries are fast.
+
+The HuggingFace cache volume in `docker-compose.yml` ensures the model is downloaded once and reused on every restart.
+
+---
+
 ## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
 - OpenAI API key
-- Your Jira tickets JSON file (list of ticket objects)
+- Jira tickets JSON file (9k sample included, full dataset available on request)
 
 ---
 
@@ -46,7 +87,7 @@ A RAG (Retrieval-Augmented Generation) system for querying Jira support tickets 
 ### 1 — Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/kg-rag.git
+git clone https://github.com/Liagos/kg-rag.git
 cd kg-rag
 ```
 
@@ -59,8 +100,8 @@ cp .env.example .env
 Edit `.env` with your values:
 
 ```bash
-# Dataset
-json_file=data/raw/your_tickets.json
+# Dataset — 9k sample included
+json_file=data/raw/support_tickets.json
 
 # OpenAI (required)
 OPEN_API_KEY=sk-...
@@ -85,26 +126,7 @@ embedding_model=text-embedding-3-small
 
 > ⚠️ Do NOT add inline comments to `.env` — they cause parsing issues.
 
-### 3 — Add your dataset
-
-```bash
-mkdir -p data/raw
-cp /path/to/your/tickets.json data/raw/support_tickets.json
-```
-
-The JSON file should be a list of ticket objects:
-```json
-[
-  {
-    "ticket_id": "TK-2024-000001",
-    "product": "CloudBackup Enterprise",
-    "priority": "critical",
-    ...
-  }
-]
-```
-
-### 4 — Start the databases
+### 3 — Start the databases
 
 ```bash
 docker-compose up -d neo4j chromadb
@@ -121,7 +143,7 @@ You should see `healthy` for both `neo4j` and `chromadb`.
 
 ## Ingestion
 
-> 💡 **Tip:** Use `docker run -it` for ingestion — the `-it` flag allocates a TTY so you can see the live progress bars for embeddings and Neo4j ingestion.
+> 💡 **Tip:** Use `docker run -it` for ingestion — the `-it` flag allocates a TTY so you see live progress bars for embeddings and Neo4j ingestion.
 
 ### Ingest both databases (recommended)
 
@@ -140,18 +162,18 @@ docker run -it --rm \
 You will see:
 ```
 --- ChromaDB + BM25 ---
-📄 Total documents: 43678
+📄 Total documents: 9000
 🧠 Generating embeddings...
-  Embedding:  45%|████████▌          | 39/86 [03:12<03:52]
+  Embedding:  45%|████████▌    | 17/35 [01:12<01:22]
 🚀 Ingesting into ChromaDB...
-  ChromaDB ingest: 100%|██████████████| 171/171 [01:23<00:00]
+  ChromaDB ingest: 100%|████████| 35/35 [00:28<00:00]
 🔎 Building BM25 index...
 ✅ Hybrid (ChromaDB + BM25) index ready
 
 --- Neo4j ---
-Ingesting 43678 tickets into Neo4j (88 batches)...
-  Neo4j ingestion:  52%|██████████▍       | 46/88 [04:21<03:58]
-✅ Neo4j ingest complete — 43678 tickets
+Ingesting 9000 tickets into Neo4j (18 batches)...
+  Neo4j ingestion: 100%|████████| 18/18 [01:45<00:00]
+✅ Neo4j ingest complete — 9000 tickets
 ```
 
 ### Ingest ChromaDB only
@@ -268,18 +290,18 @@ Open `http://localhost:7474` and login with:
 
 Useful queries:
 ```cypher
-# overview
+// overview
 MATCH (n)
 RETURN labels(n)[0] AS label, COUNT(n) AS count
 ORDER BY count DESC
 
-# latest tickets
+// latest tickets
 MATCH (t:Ticket)-[:ABOUT]->(p:Product)
 RETURN t.ticket_id, t.subject, t.priority, t.created_at
 ORDER BY t.created_at DESC
 LIMIT 10
 
-# see the graph
+// see the graph
 MATCH (n)-[r]->(m)
 RETURN n, r, m
 LIMIT 100
@@ -289,7 +311,7 @@ LIMIT 100
 
 ## Evaluation
 
-Generate eval dataset and compare ChromaDB vs Neo4j:
+Generate an eval dataset and compare ChromaDB vs Neo4j answer quality:
 
 ```bash
 # generate questions from your tickets
@@ -300,18 +322,19 @@ docker run -it --rm \
   -v $(pwd)/data:/app/data \
   kg-rag-rag:latest \
   -m kg_rag.evaluation.prepare_eval_dataset \
-    --source data/raw/support_tickets.json \
+    --source data/raw/support_tickets_sample.json \
     --output data/evaluation/eval_dataset.jsonl
 
 # run evaluation
 docker run -it --rm \
   --network kg-rag_default \
   --env-file .env \
+  --entrypoint /app/.venv/bin/python \
   -e CHROMA_HOST=chromadb \
   -e NEO4J_URI=bolt://neo4j:7687 \
   -v $(pwd)/data:/app/data \
   kg-rag-rag:latest \
-  /app/.venv/bin/python -m kg_rag.evaluation.qa_eval \
+  -m kg_rag.evaluation.qa_eval \
     --dataset data/evaluation/eval_dataset.jsonl \
     --modes chroma neo4j \
     --models gpt-4.1 \
@@ -372,8 +395,8 @@ kg-rag/
 │       ├── chroma_db.py             # ChromaDB client
 │       └── neo4j_store.py           # Neo4j client + queries
 ├── data/
-│   ├── raw/                         # Your ticket JSON files
-│   ├── evaluation/                  # Eval datasets and results
+│   ├── raw/                         # Ticket JSON files (9k sample included)
+│   ├── evaluation/                  # Eval datasets
 │   └── cached/                      # BM25 index cache
 ├── Dockerfile
 ├── Dockerfile.chromadb
@@ -416,34 +439,28 @@ kg-rag/
 - `text-embedding-3-large` (higher quality)
 
 ---
-## Dataset
-
-This repository includes a **9k sample** of the full dataset for demonstration purposes.
-
-The full dataset contains **100k+ Jira support tickets** across multiple products, regions and categories.
-
-To request the full dataset contact:
-
-**Odysseas Liagouris**
-📧 [odyliagouris@gmail.com](mailto:odyliagouris@gmail.com)
-🐙 [github.com/Liagos](https://github.com/Liagos)
 
 ## Troubleshooting
 
 **Progress bars not showing**
-Use `docker run -it` (not `docker-compose run`) for ingestion — the `-it` flag enables TTY which makes progress bars visible.
+Use `docker run -it` for ingestion — the `-it` flag enables TTY which makes progress bars visible.
 
 **Neo4j connection refused**
-Wait 30-60 seconds after starting — Neo4j takes time to initialize. Check: `docker-compose logs neo4j`
+Wait 30-60 seconds after starting — Neo4j takes time to initialize.
+Check: `docker-compose logs neo4j`
 
 **ChromaDB empty after restart**
-Make sure the volume is mounted at `/data`: `docker exec chromadb ls /data/`
+Verify the volume is mounted at `/data`:
+`docker exec chromadb ls /data/`
 
 **Rate limit errors during embedding**
-The embedder retries automatically with exponential backoff. If it keeps failing reduce batch size in `.env`: add `EMBEDDING_BATCH_SIZE=128`
+The embedder retries automatically with exponential backoff. If persistent reduce batch size by editing `ingest_chroma(batch_size=64)` in `ingest.py`.
 
 **Out of memory during ingestion**
-Reduce batch size: edit `ingest_chroma(batch_size=128)` in `ingest.py`
+Reduce batch size: edit `ingest_chroma(batch_size=64)` in `ingest.py`.
 
 **App starts but returns no results**
-Check ingestion completed: run the verify commands above. Check `json_file` path in `.env` matches the actual file location.
+Run the verify commands above. Check `json_file` in `.env` matches the actual file location.
+
+**First query is slow**
+Expected — the reranker model loads on first query (~30-60 sec). Subsequent queries are fast. The HuggingFace cache volume handles this on restarts.
