@@ -210,6 +210,8 @@ docker run -it --rm \
   --network kg-rag_default \
   --env-file .env \
   -e NEO4J_URI=bolt://neo4j:7687 \
+  -e CHROMA_HOST=chromadb \
+  -e CHROMA_PORT=8000 \
   --entrypoint /app/.venv/bin/python \
   -v $(pwd)/data:/app/data \
   kg-rag-rag:latest \
