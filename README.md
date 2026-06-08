@@ -17,7 +17,7 @@ A RAG (Retrieval-Augmented Generation) system for querying Jira support tickets 
               │   (qa.py)        │
               └──┬─────────────┬─┘
                  │             │
-    ┌────────────▼────┐    ┌─────▼───────────┐
+    ┌────────────▼────┐    ┌───▼─────────────┐
     │   ChromaDB      │    │     Neo4j       │
     │ Semantic + BM25 │    │  Graph filters  │
     │ port 8000       │    │  port 7687      │
