@@ -41,3 +41,4 @@ neo4j_data/
 # logs
 *.log
 EOF.DS_Store
+.DS_Store
