@@ -1,0 +1,43 @@
+cat > .gitignore << 'EOF'
+# secrets
+.env
+
+# python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv/
+
+# data — exclude everything except support_tickets.json
+data/raw/*
+!data/raw/support_tickets.json
+data/cached/
+data/modified/
+data/sampled/
+data/evaluation/results/
+data/evaluation/*.jsonl
+
+# chroma local storage
+src/kg_rag/vectorstore/chroma_store/
+src/kg_rag/vectorstore/chroma_store_/
+src/kg_rag/vectorstore/chroma_store_backup/
+src/kg_rag/vectorstore/chroma_store_backup_3/
+chroma_data/
+
+# neo4j docker volume
+neo4j_data/
+
+# jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE
+.idea/
+.vscode/
+
+# logs
+*.log
+EOF

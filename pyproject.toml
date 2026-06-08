@@ -1,0 +1,40 @@
+[project]
+name = "kg-rag"
+version = "0.1.0"
+description = "RAG system for Jira support tickets using ChromaDB and Neo4j"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    # databases
+    "chromadb>=1.5.9",
+    "neo4j>=6.2.0",
+    # llm providers
+    "openai>=2.36.0",
+    "anthropic>=0.103.0",
+    # embeddings + retrieval
+    "sentence-transformers==3.4.1",
+    "torch==2.2.2",
+    "transformers==4.44.2",
+    "tokenizers==0.19.1",
+    "rank-bm25>=0.2.2",
+    "numpy>=1.26.4",
+    # config + validation
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.0",
+    "python-dotenv>=1.2.2",
+    # ui
+    "streamlit>=1.57.0",
+    # utils
+    "tqdm>=4.67.3",
+    "tqdm-loggable>=0.4.1",
+]
+
+[build-system]
+requires = ["setuptools>=80"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
