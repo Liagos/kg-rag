@@ -6,23 +6,23 @@ A RAG (Retrieval-Augmented Generation) system for querying Jira support tickets 
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────┐
-│                   Streamlit UI                      │
-│              http://localhost:8501                  │
-└──────────────────────┬──────────────────────────────┘
-                       │
-              ┌────────▼─────────┐
-              │   RAG Pipeline   │
-              │   (qa.py)        │
-              └──┬─────────────┬─┘
-                 │             │
-    ┌────────────▼────┐    ┌───▼─────────────┐
-    │   ChromaDB      │    │     Neo4j       │
-    │ Semantic + BM25 │    │  Graph filters  │
-    │ port 8000       │    │  port 7687      │
-    └─────────────────┘    └─────────────────┘
-```
+                        ```
+                        ┌─────────────────────────────────────────────────────┐
+                        │                   Streamlit UI                      │
+                        │              http://localhost:8501                  │
+                        └──────────────────────┬──────────────────────────────┘
+                                               │
+                                      ┌────────▼─────────┐
+                                      │   RAG Pipeline   │
+                                      │   (qa.py)        │
+                                      └──┬─────────────┬─┘
+                                         │             │
+                            ┌────────────▼────┐    ┌───▼─────────────┐
+                            │   ChromaDB      │    │     Neo4j       │
+                            │ Semantic + BM25 │    │  Graph filters  │
+                            │ port 8000       │    │  port 7687      │
+                            └─────────────────┘    └─────────────────┘
+                        ```
 
 ### Retrieval Modes
 | Mode | What runs | Best for |
