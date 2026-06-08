@@ -416,6 +416,17 @@ kg-rag/
 - `text-embedding-3-large` (higher quality)
 
 ---
+## Dataset
+
+This repository includes a **9k sample** of the full dataset for demonstration purposes.
+
+The full dataset contains **100k+ Jira support tickets** across multiple products, regions and categories.
+
+To request the full dataset contact:
+
+**Odysseas Liagouris**
+📧 [odyliagouris@gmail.com](mailto:odyliagouris@gmail.com)
+🐙 [github.com/Liagos](https://github.com/Liagos)
 
 ## Troubleshooting
 
