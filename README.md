@@ -101,7 +101,7 @@ Edit `.env` with your values:
 
 ```bash
 # Dataset — 9k sample included
-json_file=data/raw/support_tickets.json
+json_file=data/raw/support_tickets_sample.json
 
 # OpenAI (required)
 OPEN_API_KEY=sk-...
